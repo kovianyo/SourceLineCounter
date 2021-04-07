@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Microsoft.VisualStudio.Imaging;
 
 namespace SourceLineCounter
 {
@@ -54,7 +55,7 @@ namespace SourceLineCounter
         private void CreateContextMenu(UIElement placementTargetElement)
         {
             var contextMenu = new ContextMenu { PlacementTarget = placementTargetElement };
-            var menuItem = new MenuItem { Header = "Recalculate" };
+            var menuItem = new MenuItem { Header = "Recalculate", Icon = new CrispImage { Moniker = KnownMonikers.Refresh } };
             menuItem.Click += RecalculateOnClick;
             contextMenu.Items.Add(menuItem);
             _contextMenu = contextMenu;
