@@ -44,7 +44,7 @@ namespace SourceLineCounter
 
         private Label CreateLabel(DockPanel dockPanel)
         {
-            var label = new Label { Foreground = Brushes.White };
+            var label = new Label { Foreground = Brushes.White, ToolTip = "The number of source code lines in the current Solution" };
             DockPanel.SetDock(label, Dock.Right);
             dockPanel.Children.Insert(1, label);
             label.MouseRightButtonUp += ShowContextMenu;
