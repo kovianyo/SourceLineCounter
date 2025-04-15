@@ -1,8 +1,9 @@
-using System.Threading;
 using EnvDTE;
+using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.Shell;
+using System.Threading;
 using Task = System.Threading.Tasks.Task;
 
 namespace SourceLineCounter
@@ -52,7 +53,20 @@ namespace SourceLineCounter
 
         private void SolutionEventsOnOpened()
         {
-            UpdateLineCount();
+            if (_workspace != null)
+            {
+                _workspace.WorkspaceChanged += OnWorkspaceChanged;
+            }
+        }
+
+        private void OnWorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
+        {
+            if (e.Kind == WorkspaceChangeKind.SolutionChanged)
+            {
+                _workspace.WorkspaceChanged -= OnWorkspaceChanged;
+
+                UpdateLineCount();
+            }
         }
 
         private void UpdateLineCount()
