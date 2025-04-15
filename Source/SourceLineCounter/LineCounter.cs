@@ -26,23 +26,22 @@ namespace SourceLineCounter
             if (componentModel != null)
             {
                 _workspace = componentModel.GetService<VisualStudioWorkspace>();
-                
+                _workspace.WorkspaceChanged += OnWorkspaceChanged;
+
                 _presenter = new Presenter();
                 _presenter.CreateControls();
                 _presenter.OnRecalculate += UpdateLineCount;
 
                 await package.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-                _dte = (DTE) await package.GetServiceAsync(typeof(DTE));
-                
+
+                _dte = (DTE)await package.GetServiceAsync(typeof(DTE));
+
                 if (_dte != null)
                 {
                     _events = _dte.Events;
                     _solutionEvents = _events.SolutionEvents;
-                    _solutionEvents.Opened += SolutionEventsOnOpened;
                     _solutionEvents.AfterClosing += SolutionEventsOnAfterClosing;
                 }
-
-                UpdateLineCount();
             }
         }
 
@@ -51,20 +50,10 @@ namespace SourceLineCounter
             _presenter.SetLineCount(0);
         }
 
-        private void SolutionEventsOnOpened()
-        {
-            if (_workspace != null)
-            {
-                _workspace.WorkspaceChanged += OnWorkspaceChanged;
-            }
-        }
-
         private void OnWorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
         {
             if (e.Kind == WorkspaceChangeKind.SolutionChanged)
             {
-                _workspace.WorkspaceChanged -= OnWorkspaceChanged;
-
                 UpdateLineCount();
             }
         }
@@ -72,6 +61,7 @@ namespace SourceLineCounter
         private void UpdateLineCount()
         {
             int lineCount = LineCountCalculator.CalculateLineCount(_workspace);
+
             _presenter.SetLineCount(lineCount);
         }
     }
