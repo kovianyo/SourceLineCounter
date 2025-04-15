@@ -14,11 +14,6 @@ namespace SourceLineCounter
 
         private Presenter _presenter;
 
-        private DTE _dte;
-        private Events _events;
-        private SolutionEvents _solutionEvents;
-
-
         public async Task InitializeAsync(AsyncPackage package, CancellationToken cancellationToken)
         {
             var componentModel = (IComponentModel)await package.GetServiceAsync(typeof(SComponentModel));
@@ -28,20 +23,28 @@ namespace SourceLineCounter
                 _workspace = componentModel.GetService<VisualStudioWorkspace>();
                 _workspace.WorkspaceChanged += OnWorkspaceChanged;
 
-                _presenter = new Presenter();
-                _presenter.CreateControls();
-                _presenter.OnRecalculate += UpdateLineCount;
+                CreatePresenter();
 
-                await package.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+                await RegisterSolutionEvents(package, cancellationToken);
+            }
+        }
 
-                _dte = (DTE)await package.GetServiceAsync(typeof(DTE));
+        private void CreatePresenter()
+        {
+            _presenter = new Presenter();
+            _presenter.CreateControls();
+            _presenter.OnRecalculate += UpdateLineCount;
+        }
 
-                if (_dte != null)
-                {
-                    _events = _dte.Events;
-                    _solutionEvents = _events.SolutionEvents;
-                    _solutionEvents.AfterClosing += SolutionEventsOnAfterClosing;
-                }
+        private async Task RegisterSolutionEvents(AsyncPackage package, CancellationToken cancellationToken)
+        {
+            await package.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+            var dte = (DTE)await package.GetServiceAsync(typeof(DTE));
+
+            if (dte != null)
+            {
+                dte.Events.SolutionEvents.AfterClosing += SolutionEventsOnAfterClosing;
             }
         }
 
