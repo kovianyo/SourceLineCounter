@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# Use pattern matching
+dotnet_diagnostic.IDE0019.severity = none
+
+# Use "Async" suffix in methods
+dotnet_diagnostic.VSTHRD200.severity = none
